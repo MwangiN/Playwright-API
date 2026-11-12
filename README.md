@@ -10,6 +10,8 @@ npm test                # run all tests
 npm run test:smoke      # run @smoke subset
 npm run test:headed     # watch the browser
 npm run report          # open HTML report
+npm run test:allure     # run tests + generate Allure report
+npm run allure:open     # open the Allure report
 npm run typecheck       # TypeScript check
 ```
 
@@ -53,3 +55,6 @@ Out of scope: cart, checkout, sorting and other post-login features.
 - Add a CI workflow (GitHub Actions) running `npm test`.
 - Add a `storageState` setup project once tests need an authenticated session (cart, checkout).
 - Add Firefox and WebKit projects.
+
+## CI & Allure report
+GitHub Actions (`.github/workflows/playwright.yml`) runs the suite on every push/PR, uploads the Allure report as an artifact, and on `main` publishes it to GitHub Pages. One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
