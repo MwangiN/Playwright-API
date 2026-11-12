@@ -1,9 +1,6 @@
 name: Playwright Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   schedule:
     # GitHub cron runs in UTC. 17:00 UTC = 20:00 (8pm) East Africa Time (UTC+3), every Friday.
     - cron: '0 17 * * 5'
@@ -33,9 +30,22 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Restore Allure trend history
+        if: ${{ !cancelled() }}
+        # History lives on the published Pages site. The first run (or a run
+        # before Pages is enabled) has nothing to download, which is fine.
+        run: |
+          mkdir -p allure-history
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          curl -fsSL "https://${owner}.github.io/${repo}/history.jsonl" -o allure-history/history.jsonl             || { echo "No previous history found, starting fresh"; rm -f allure-history/history.jsonl; }
+
       - name: Generate Allure report
         if: ${{ !cancelled() }}
-        run: npm run allure:generate
+        run: |
+          npm run allure:generate
+          # Publish history next to the report so the next run can restore it
+          cp allure-history/history.jsonl allure-report/history.jsonl
 
       - name: Upload HTML report
         if: ${{ !cancelled() }}
@@ -62,14 +72,14 @@ jobs:
           retention-days: 14
 
       - name: Upload Pages artifact
-        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: allure-report/
 
   publish:
     needs: test
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.test.result != 'skipped' }}
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && needs.test.result != 'skipped' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -57,4 +57,6 @@ Out of scope: cart, checkout, sorting and other post-login features.
 - Add Firefox and WebKit projects.
 
 ## CI & Allure report
-GitHub Actions (`.github/workflows/playwright.yml`) runs the suite on every push/PR, uploads the Allure report as an artifact, and on `main` publishes it to GitHub Pages. One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+GitHub Actions (`.github/workflows/playwright.yml`) runs the suite every Friday at 8pm EAT (or manually from the Actions tab), uploads the reports as artifacts, and on `main` publishes the Allure report to GitHub Pages. One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+
+Trend history: `allurerc.mjs` sets `historyPath`. Each run downloads `history.jsonl` from the previously published site, appends the new run, and republishes it with the report (last 20 runs kept). Locally, history accumulates in `allure-history/` (git-ignored).
